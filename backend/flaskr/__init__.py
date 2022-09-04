@@ -68,9 +68,9 @@ def create_app(test_config=None):
 
         return jsonify({
             'questions':formatted_question[start:end],
-            'totalQuestions':len(questions),
+            'total_questions':len(questions),
             'categories':formatted_categories,
-            'currentCategory': None
+            'current_category': None
             })
             
     """
@@ -130,22 +130,23 @@ def create_app(test_config=None):
             
             return jsonify({
                 "questions": formatted_question[start:end],
-                "totalQuestions": len(questions),
-                "currentCategory": None
+                "total_questions": len(questions),
+                "current_category": None
                 })
 
         else:
-            formatted_question = [question.format() for question in questions]
             try:
                 question = Question(question=question,answer=answer,category=category,difficulty=difficulty)
                 question.insert()
                 
+                questions = Question.query.all()
+                formatted_question = [question.format() for question in questions]
                 return jsonify({
                     'success': True,
                     'created': question.id,
                     'questions':formatted_question[start:end],
-                    'totalQuestions': len(questions),
-                    'currentCategory': question.category
+                    'total_questions': len(questions),
+                    'current_category': question.category
                 })
             except:
                 abort(422)
@@ -186,8 +187,8 @@ def create_app(test_config=None):
 
         return jsonify({
             "questions": formatted_question[start:end],
-            "totalQuestions": len(questions),
-            "currentCategory": category.type
+            "total_questions": len(questions),
+            "current_category": category.type
             })
 
     """
