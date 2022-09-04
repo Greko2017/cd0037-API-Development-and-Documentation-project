@@ -3,9 +3,17 @@ from sqlalchemy import Column, String, Integer, create_engine
 from flask_sqlalchemy import SQLAlchemy
 import json
 
+# reference : https://www.geeksforgeeks.org/connecting-to-sql-database-using-sqlalchemy-in-python/
+# DEFINE THE DATABASE CREDENTIALS
+user = 'postgres'
+password = 'postgres'
+host = '127.0.0.1'
+port = 5432
 database_name = 'trivia'
-database_path = 'postgresql://{}/{}'.format('localhost:5432', database_name)
-
+# database_path = 'postgresql://{}/{}'.format('localhost:5432', database_name)
+database_path="postgresql://{0}:{1}@{2}:{3}/{4}".format(
+            user, password, host, port, database_name
+        )
 db = SQLAlchemy()
 
 """
@@ -56,7 +64,7 @@ class Question(db.Model):
             'answer': self.answer,
             'category': self.category,
             'difficulty': self.difficulty
-            }
+        }
 
 """
 Category

@@ -1,3 +1,4 @@
+
 import os
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -16,17 +17,32 @@ def create_app(test_config=None):
     """
     @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
     """
+    CORS(app)    
 
     """
     @TODO: Use the after_request decorator to set Access-Control-Allow
     """
+    @app.after_request
+    def after_request(response):
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+        response.headers.add('Access-Control-Allow-Headers', 'GET, POST, PATCH, DELETE, OPTIONS')
+        return response
 
     """
     @TODO:
     Create an endpoint to handle GET requests
     for all available categories.
     """
-
+    @app.route('/categories', methods=['GET'])
+    def get_categories():
+        categories = Category.query.all()
+        formatted_categories = {}
+        for index, category in enumerate(categories):
+            formatted_categories[str(category.id)] = category.type
+        
+        return jsonify({
+            'categories':formatted_categories,
+            })
 
     """
     @TODO:
@@ -34,20 +50,61 @@ def create_app(test_config=None):
     including pagination (every 10 questions).
     This endpoint should return a list of questions,
     number of total questions, current category, categories.
+    """
+    @app.route('/questions', methods=['GET'])
+    #@cross_origin
+    def get_questions():
+        # Implement pagination
+        page = request.args.get('page', 1, type=int)
+        start = (page - 1) * QUESTIONS_PER_PAGE
+        end = start + QUESTIONS_PER_PAGE
 
+        questions = Question.query.all()
+        formatted_question = [question.format() for question in questions]
+        # Categories
+        categories = Category.query.all()
+        formatted_categories = {}
+        for index, category in enumerate(categories):
+            formatted_categories[str(index+1)] = category.type
+
+        return jsonify({
+            'questions':formatted_question[start:end],
+            'totalQuestions':len(questions),
+            'categories':formatted_categories,
+            'currentCategory': None
+            })
+            
+    """
     TEST: At this point, when you start the application
     you should see questions and categories generated,
     ten questions per page and pagination at the bottom of the screen for three pages.
     Clicking on the page numbers should update the questions.
-    """
-
-    """
     @TODO:
     Create an endpoint to DELETE question using a question ID.
 
     TEST: When you click the trash icon next to a question, the question will be removed.
     This removal will persist in the database and when you refresh the page.
     """
+    @app.route('/questions/<int:question_id>', methods=['DELETE'])
+    def delete_quesiton(question_id):
+        question = Question.query.filter(Question.id == question_id).one_or_none()
+
+        if question is None:
+            abort(404)        
+        else:
+            question.delete()
+            return jsonify({
+                'sucess': True,
+                'id': question_id
+            })
+
+    @app.errorhandler(404)
+    def  not_found(error):
+        return jsonify({
+        "success": False, 
+        "error": 404,
+        "message": "Not found"
+        }), 404
 
     """
     @TODO:
@@ -59,6 +116,55 @@ def create_app(test_config=None):
     the form will clear and the question will appear at the end of the last page
     of the questions list in the "List" tab.
     """
+    @app.route('/questions', methods=['POST'])
+    def add_question():
+        body = request.get_json()
+        question = body.get('question', None)
+        answer = body.get('answer', None)
+        category = body.get('category', None)
+        difficulty = body.get('difficulty', None)
+
+        page = request.args.get('page', 1, type=int)
+        start = (page - 1) * QUESTIONS_PER_PAGE
+        end = start + QUESTIONS_PER_PAGE
+        
+        questions = Question.query.all()
+
+        # Search logic        
+        searchTerm = body.get('searchTerm', None)
+        if searchTerm is not None:
+            filter_questions = Question.query.filter(Question.question.ilike("%{}%".format(searchTerm))).all()
+            formatted_question = [question.format() for question in filter_questions]
+            
+            return jsonify({
+                "questions": formatted_question[start:end],
+                "totalQuestions": len(questions),
+                "currentCategory": None
+                })
+
+        else:
+            formatted_question = [question.format() for question in questions]
+            try:
+                question = Question(question=question,answer=answer,category=category,difficulty=difficulty)
+                question.insert()
+                
+                return jsonify({
+                    'success': True,
+                    'created': question.id,
+                    'questions':formatted_question[start:end],
+                    'totalQuestions': len(questions),
+                    'currentCategory': question.category
+                })
+            except:
+                abort(422)
+
+        @app.errorhandler(422)
+        def unprocessable(error):
+            return jsonify({
+            "success": False, 
+            "error": 422,
+            "message": "unprocessable"
+            }), 422
 
     """
     @TODO:
@@ -70,6 +176,7 @@ def create_app(test_config=None):
     only question that include that string within their question.
     Try using the word "title" to start.
     """
+    # I added the logic in add_question controller
 
     """
     @TODO:
@@ -79,6 +186,24 @@ def create_app(test_config=None):
     categories in the left column will cause only questions of that
     category to be shown.
     """
+    @app.route('/categories/<int:category_id>/questions', methods=['GET'])
+    def get_questions_by_category_id(category_id):
+        category = Category.query.filter(Category.id == category_id).one_or_none()
+        if category is None:
+            abort(404)
+        
+        questions = Question.query.filter(Question.category == category.id).all()
+        formatted_question = [question.format() for question in questions]
+
+        page = request.args.get('page', 1, type=int)
+        start = (page - 1) * QUESTIONS_PER_PAGE
+        end = start + QUESTIONS_PER_PAGE
+
+        return jsonify({
+            "questions": formatted_question[start:end],
+            "totalQuestions": len(questions),
+            "currentCategory": category.type
+            })
 
     """
     @TODO:
