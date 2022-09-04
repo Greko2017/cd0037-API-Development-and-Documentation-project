@@ -65,7 +65,10 @@ def create_app(test_config=None):
         formatted_categories = {}
         for index, category in enumerate(categories):
             formatted_categories[str(index+1)] = category.type
-
+        
+        if len(formatted_question[start:end]) == 0:
+            abort(422)
+            
         return jsonify({
             'questions':formatted_question[start:end],
             'total_questions':len(questions),
@@ -93,7 +96,6 @@ def create_app(test_config=None):
         else:
             question.delete()
             return jsonify({
-                'sucess': True,
                 'id': question_id
             })
 
@@ -217,7 +219,10 @@ def create_app(test_config=None):
             else:
                 questions = Question.query.filter(Question.category == quiz_category['id']).filter(Question.id.notin_(previous_questions)).all()
             # choose random number amont index of array        
-            question = questions[random.randint(0, (len(questions)-1) )]
+            nrb_questions = 2
+            if len(questions) != 0:
+                nrb_questions = len(questions)
+            question = questions[random.randint(0, (nrb_questions-1) )]
                 
             return jsonify({
                 "question": question.format()
