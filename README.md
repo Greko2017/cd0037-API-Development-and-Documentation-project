@@ -1,3 +1,70 @@
+## Getting Setup
+
+### Installing Dependencies, 
+### Running Your Frontend in Dev Mode 
+
+
+1. **Installing Node and NPM**
+   This project depends on Nodejs and Node Package Manager (NPM). Before continuing, you must download and install Node (the download includes NPM) from [https://nodejs.com/en/download](https://nodejs.org/en/download/).
+
+2. **Installing project dependencies**
+   This project uses NPM to manage software dependencies. NPM Relies on the package.json file located in the `frontend` directory of this repository. After cloning, open your terminal and run:
+
+3. **Starting the frontend local server**
+```bash
+cd frontend
+```
+
+```bash
+npm install
+```
+
+```bash
+npm start
+```
+
+
+The frontend app was built using create-react-app. In order to run the app in development mode use `npm start`. You can change the script in the `package.json` file.
+
+Open [http://localhost:3000](http://localhost:3000) to view it in the browser. The page will reload if you make edits.
+
+
+
+4. **Python 3.7** - Follow instructions to install the latest version of python for your platform in the [python docs](https://docs.python.org/3/using/unix.html#getting-and-installing-the-latest-version-of-python)
+
+5. **PIP Dependencies** - Once your virtual environment is setup and running, install the required dependencies by navigating to the `/backend` directory and running:
+
+```bash
+pip install -r requirements.txt
+```
+3. **Starting the frontend local server** - make sure your are in `root_path\backend` folder
+
+### Set up the Database
+
+With Postgres running, create a `trivia` database:
+
+```bash
+createdb trivia
+```
+
+Populate the database using the `trivia.psql` file provided. From the `backend` folder in terminal run:
+
+```bash
+psql trivia < trivia.psql
+```
+
+### Run the Server
+
+From within the `./backend` directory first ensure you are working using your created virtual environment.
+
+To run the server, execute:
+
+```bash
+flask run
+```
+
+
+
 ## API Reference
 
 ### Getting Started
