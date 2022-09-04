@@ -1,4 +1,3 @@
-
 import os
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -98,13 +97,6 @@ def create_app(test_config=None):
                 'id': question_id
             })
 
-    @app.errorhandler(404)
-    def  not_found(error):
-        return jsonify({
-        "success": False, 
-        "error": 404,
-        "message": "Not found"
-        }), 404
 
     """
     @TODO:
@@ -158,13 +150,6 @@ def create_app(test_config=None):
             except:
                 abort(422)
 
-        @app.errorhandler(422)
-        def unprocessable(error):
-            return jsonify({
-            "success": False, 
-            "error": 422,
-            "message": "unprocessable"
-            }), 422
 
     """
     @TODO:
@@ -216,12 +201,49 @@ def create_app(test_config=None):
     one question at a time is displayed, the user is allowed to answer
     and shown whether they were correct or not.
     """
+    @app.route('/quizzes', methods=['POST'])
+    def get_quizzes():
+        body = request.get_json()
+        previous_questions = body.get('previous_questions', [])
+        quiz_category = body.get('quiz_category', None)
+ 
+        if (previous_questions is None) or (quiz_category is None):
+            abort(404)
+        try:   
+            if quiz_category['id'] == 0:
+                questions = Question.query.filter(Question.id.notin_(previous_questions)).all()
+                # print('b questions',questions)
+            else:
+                questions = Question.query.filter(Question.category == quiz_category['id']).filter(Question.id.notin_(previous_questions)).all()
+            # choose random number amont index of array        
+            question = questions[random.randint(0, (len(questions)-1) )]
+                
+            return jsonify({
+                "question": question.format()
+                })
+        except:
+            abort(422)
 
     """
     @TODO:
     Create error handlers for all expected errors
     including 404 and 422.
     """
+    @app.errorhandler(404)
+    def  not_found(error):
+        return jsonify({
+        "success": False, 
+        "error": 404,
+        "message": "Not found"
+        }), 404
+        
+    @app.errorhandler(422)
+    def unprocessable(error):
+        return jsonify({
+        "success": False, 
+        "error": 422,
+        "message": "unprocessable"
+        }), 422
 
     return app
 
