@@ -14,12 +14,12 @@ def create_app(test_config=None):
     setup_db(app)
 
     """
-    @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
+    @DONE: Set up CORS. Allow '*' for origins. Delete the sample route after completing the DONEs
     """
     CORS(app)    
 
     """
-    @TODO: Use the after_request decorator to set Access-Control-Allow
+    @DONE: Use the after_request decorator to set Access-Control-Allow
     """
     @app.after_request
     def after_request(response):
@@ -28,12 +28,15 @@ def create_app(test_config=None):
         return response
 
     """
-    @TODO:
+    @DONE:
     Create an endpoint to handle GET requests
     for all available categories.
     """
-    @app.route('/categories', methods=['GET'])
+    @app.route('/categories', methods=['GET', 'DELETE'])
     def get_categories():
+        if request.method == 'DELETE':
+            abort(405)
+
         categories = Category.query.all()
         formatted_categories = {}
         for index, category in enumerate(categories):
@@ -44,7 +47,7 @@ def create_app(test_config=None):
             })
 
     """
-    @TODO:
+    @DONE:
     Create an endpoint to handle GET requests for questions,
     including pagination (every 10 questions).
     This endpoint should return a list of questions,
@@ -81,7 +84,7 @@ def create_app(test_config=None):
     you should see questions and categories generated,
     ten questions per page and pagination at the bottom of the screen for three pages.
     Clicking on the page numbers should update the questions.
-    @TODO:
+    @DONE:
     Create an endpoint to DELETE question using a question ID.
 
     TEST: When you click the trash icon next to a question, the question will be removed.
@@ -101,7 +104,7 @@ def create_app(test_config=None):
 
 
     """
-    @TODO:
+    @DONE:
     Create an endpoint to POST a new question,
     which will require the question and answer text,
     category, and difficulty score.
@@ -131,6 +134,7 @@ def create_app(test_config=None):
             formatted_question = [question.format() for question in filter_questions]
             
             return jsonify({
+                'success': True,
                 "questions": formatted_question[start:end],
                 "total_questions": len(questions),
                 "current_category": None
@@ -155,7 +159,7 @@ def create_app(test_config=None):
 
 
     """
-    @TODO:
+    @DONE:
     Create a POST endpoint to get questions based on a search term.
     It should return any questions for whom the search term
     is a substring of the question.
@@ -167,7 +171,7 @@ def create_app(test_config=None):
     # I added the logic in add_question controller
 
     """
-    @TODO:
+    @DONE:
     Create a GET endpoint to get questions based on category.
 
     TEST: In the "List" tab / main screen, clicking on one of the
@@ -194,7 +198,7 @@ def create_app(test_config=None):
             })
 
     """
-    @TODO:
+    @DONE:
     Create a POST endpoint to get questions to play the quiz.
     This endpoint should take category and previous question parameters
     and return a random questions within the given category,
@@ -209,7 +213,6 @@ def create_app(test_config=None):
         body = request.get_json()
         previous_questions = body.get('previous_questions', [])
         quiz_category = body.get('quiz_category', None)
- 
         if (previous_questions is None) or (quiz_category is None):
             abort(404)
         try:   
@@ -228,10 +231,10 @@ def create_app(test_config=None):
                 "question": question.format()
                 })
         except:
-            abort(422)
+            abort(500)
 
     """
-    @TODO:
+    @DONE:
     Create error handlers for all expected errors
     including 404 and 422.
     """
@@ -250,6 +253,22 @@ def create_app(test_config=None):
         "error": 422,
         "message": "unprocessable"
         }), 422
+
+    @app.errorhandler(500)
+    def server_side_error(error):
+        return jsonify({
+        "success": False, 
+        "error": 500,
+        "message": "Server Side Error"
+        }), 500
+    
+    @app.errorhandler(405)
+    def method_not_allowed(error):
+        return jsonify({
+        "success": False, 
+        "error": 405,
+        "message": "Method Not Allowed"
+        }), 405
 
     return app
 
