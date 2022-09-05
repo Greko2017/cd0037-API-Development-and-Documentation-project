@@ -221,10 +221,17 @@ def create_app(test_config=None):
                 # print('b questions',questions)
             else:
                 questions = Question.query.filter(Question.category == quiz_category['id']).filter(Question.id.notin_(previous_questions)).all()
-            # choose random number amont index of array        
-            nrb_questions = 2
+            # choose random number amont index of array  
+            if len(questions) == 0:
+                return jsonify({
+                    "question": None
+                    })
+
+            nrb_questions = 1
             if len(questions) != 0:
                 nrb_questions = len(questions)
+            print('nrb_questions', nrb_questions)
+            print('questions', questions)
             question = questions[random.randint(0, (nrb_questions-1) )]
                 
             return jsonify({

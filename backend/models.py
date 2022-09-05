@@ -6,17 +6,17 @@ from dotenv import load_dotenv
 # reference : https://www.geeksforgeeks.org/connecting-to-sql-database-using-sqlalchemy-in-python/
 # DEFINE THE DATABASE CREDENTIALS
 load_dotenv()
-host = '127.0.0.1'
-print('----os:', os.environ.get("DB_NAME"))
+DB_HOST = os.environ.get("DB_HOST")
 DB_NAME = os.environ.get("DB_NAME")
 DB_USER=os.environ.get("DB_USER")
 DB_PASSWORD = os.environ.get("DB_PASSWORD")
 
-port = 5432
+DB_PORT = os.environ.get("DB_PORT")
+
 database_name = 'trivia'
 # database_path = 'postgresql://{}/{}'.format('localhost:5432', database_name)
 database_path="postgresql://{0}:{1}@{2}:{3}/{4}".format(
-            DB_USER, DB_PASSWORD, host, port, DB_NAME
+            DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME
         )
 db = SQLAlchemy()
 
